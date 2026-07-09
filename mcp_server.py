@@ -340,13 +340,14 @@ async def bili_comments(bvid: str, num: int = 30) -> str:
 # ========== Tool 3: 获取字幕 ==========
 
 @mcp.tool()
-async def bili_subtitle(bvid: str) -> str:
+async def bili_subtitle(bvid: str, page: int = 1) -> str:
     """
     获取B站视频的AI字幕（语音转文字）
 
     Args:
         bvid: 视频BV号，如"BV1uNk1YxEJQ"
-    
+        page: 分P页码，从1开始，默认1（第一P）
+
     Returns:
         视频的完整字幕文本
     """
@@ -355,7 +356,9 @@ async def bili_subtitle(bvid: str) -> str:
 
     info = await v.get_info()
     cid = info.get("cid", 0)
-    if not cid and info.get("pages"):
+    if info.get("pages") and len(info["pages"]) >= page:
+        cid = info["pages"][page - 1].get("cid", 0)
+    elif not cid and info.get("pages"):
         cid = info["pages"][0].get("cid", 0)
 
     if not cid:
